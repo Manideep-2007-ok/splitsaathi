@@ -57,19 +57,19 @@ function Modal({
       className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-fadeIn" />
 
       <div
         className={clsx(
-          "relative w-full rounded-2xl bg-[#18181B]/60 backdrop-blur-xl border border-white/10 shadow-2xl animate-slideUp",
+          "relative w-full rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl animate-slideUp",
           sizeClasses[size] ?? sizeClasses.md,
           className
         )}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
             {title && (
-              <h2 className="text-lg font-bold text-[var(--text-primary)] font-[Syne]">
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">
                 {title}
               </h2>
             )}

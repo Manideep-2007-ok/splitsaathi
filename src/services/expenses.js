@@ -4,42 +4,99 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
-  addDoc,
   collection,
   query,
   orderBy,
   onSnapshot,
   serverTimestamp,
   increment,
+  writeBatch,
 } from "./firebase.js";
 
+function sanitizeExpenseData(expenseData, currentUserUid) {
+  const title = (expenseData.title ?? "").trim();
+  if (!title) {
+    throw new Error("Expense title is required");
+  }
+
+  const amount = parseFloat(expenseData.amount);
+  if (!amount || isNaN(amount) || amount <= 0) {
+    throw new Error("Expense amount must be greater than zero");
+  }
+
+  const paidBy = expenseData.paidBy ?? currentUserUid;
+  if (!paidBy) {
+    throw new Error("Paid-by user is required");
+  }
+
+  const splits = expenseData.splits;
+  if (!splits || typeof splits !== "object" || Object.keys(splits).length === 0) {
+    throw new Error("At least one split entry is required");
+  }
+
+  const cleanSplits = {};
+  for (const [uid, value] of Object.entries(splits)) {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue) && numValue > 0) {
+      cleanSplits[uid] = numValue;
+    }
+  }
+
+  if (Object.keys(cleanSplits).length === 0) {
+    throw new Error("At least one member must have a non-zero split");
+  }
+
+  return {
+    title,
+    amount: parseFloat(amount.toFixed(2)),
+    paidBy,
+    category: expenseData.category || "general",
+    splitType: expenseData.splitType || "equal",
+    splits: cleanSplits,
+    date: expenseData.date || new Date().toISOString().split("T")[0],
+    createdAt: serverTimestamp(),
+    createdBy: currentUserUid,
+  };
+}
+
 export async function addExpense(groupId, expenseData, currentUserUid) {
+  if (!groupId) {
+    throw new Error("Group ID is required");
+  }
+
+  if (!currentUserUid) {
+    throw new Error("User must be authenticated to add an expense");
+  }
+
+  const sanitized = sanitizeExpenseData(expenseData, currentUserUid);
+
   try {
-    const expensesCollection = collection(db, "groups", groupId, "expenses");
+    const batch = writeBatch(db);
 
-    const newExpense = {
-      title: (expenseData.title ?? "").trim(),
-      amount: parseFloat(expenseData.amount) || 0,
-      paidBy: expenseData.paidBy ?? currentUserUid,
-      category: expenseData.category ?? "general",
-      splitType: expenseData.splitType ?? "equal",
-      splits: expenseData.splits ?? {},
-      date: expenseData.date ?? new Date().toISOString(),
-      createdAt: serverTimestamp(),
-      createdBy: currentUserUid,
-    };
-
-    const docRef = await addDoc(expensesCollection, newExpense);
+    const expenseRef = doc(collection(db, "groups", groupId, "expenses"));
+    batch.set(expenseRef, sanitized);
 
     const groupRef = doc(db, "groups", groupId);
-    await updateDoc(groupRef, {
-      totalExpenses: increment(newExpense.amount),
+    batch.update(groupRef, {
+      totalExpenses: increment(sanitized.amount),
       updatedAt: serverTimestamp(),
     });
 
-    return { id: docRef.id, ...newExpense };
+    await batch.commit();
+
+    return { id: expenseRef.id, ...sanitized };
   } catch (error) {
-    throw new Error(error?.message ?? "Failed to add expense");
+    console.error("addExpense failed:", {
+      code: error?.code ?? "UNKNOWN",
+      message: error?.message,
+      groupId,
+      amount: sanitized.amount,
+    });
+    throw new Error(
+      error?.code === "permission-denied"
+        ? "Permission denied. Check your Firestore security rules."
+        : error?.message ?? "Failed to add expense"
+    );
   }
 }
 
@@ -55,15 +112,17 @@ export async function fetchExpense(groupId, expenseId) {
 
     return { id: expenseSnap.id, ...expenseSnap.data() };
   } catch (error) {
+    console.error("fetchExpense failed:", error?.code, error?.message);
     throw new Error(error?.message ?? "Failed to fetch expense");
   }
 }
 
 export async function updateExpense(groupId, expenseId, updates, previousAmount) {
   try {
-    const expenseRef = doc(db, "groups", groupId, "expenses", expenseId);
+    const batch = writeBatch(db);
 
-    await updateDoc(expenseRef, {
+    const expenseRef = doc(db, "groups", groupId, "expenses", expenseId);
+    batch.update(expenseRef, {
       ...updates,
       updatedAt: serverTimestamp(),
     });
@@ -73,31 +132,56 @@ export async function updateExpense(groupId, expenseId, updates, previousAmount)
 
       if (amountDelta !== 0) {
         const groupRef = doc(db, "groups", groupId);
-        await updateDoc(groupRef, {
+        batch.update(groupRef, {
           totalExpenses: increment(amountDelta),
           updatedAt: serverTimestamp(),
         });
       }
     }
+
+    await batch.commit();
   } catch (error) {
-    throw new Error(error?.message ?? "Failed to update expense");
+    console.error("updateExpense failed:", error?.code, error?.message);
+    throw new Error(
+      error?.code === "permission-denied"
+        ? "Permission denied. Check your Firestore security rules."
+        : error?.message ?? "Failed to update expense"
+    );
   }
 }
 
-export async function deleteExpense(groupId, expenseId, expenseAmount) {
+export async function deleteExpense(groupId, expenseId, expenseAmount, requesterUid) {
   try {
+    const expenseSnap = await getDoc(doc(db, "groups", groupId, "expenses", expenseId));
+    if (!expenseSnap.exists()) {
+      throw new Error("Expense not found");
+    }
+
+    if (expenseSnap.data().createdBy !== requesterUid) {
+      throw new Error("Only the creator of this expense can delete it");
+    }
+
+    const batch = writeBatch(db);
+
     const expenseRef = doc(db, "groups", groupId, "expenses", expenseId);
-    await deleteDoc(expenseRef);
+    batch.delete(expenseRef);
 
     if (expenseAmount && expenseAmount > 0) {
       const groupRef = doc(db, "groups", groupId);
-      await updateDoc(groupRef, {
+      batch.update(groupRef, {
         totalExpenses: increment(-expenseAmount),
         updatedAt: serverTimestamp(),
       });
     }
+
+    await batch.commit();
   } catch (error) {
-    throw new Error(error?.message ?? "Failed to delete expense");
+    console.error("deleteExpense failed:", error?.code, error?.message);
+    throw new Error(
+      error?.code === "permission-denied"
+        ? "Permission denied. Check your Firestore security rules."
+        : error?.message ?? "Failed to delete expense"
+    );
   }
 }
 
@@ -117,6 +201,7 @@ export function subscribeToExpenses(groupId, onData, onError) {
       onData(expenses);
     },
     (error) => {
+      console.error("subscribeToExpenses error:", error?.code, error?.message);
       onError?.(error?.message ?? "Failed to load expenses");
     }
   );

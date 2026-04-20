@@ -11,6 +11,7 @@ import AddExpense from "./pages/AddExpense.jsx";
 import Balances from "./pages/Balances.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import Profile from "./pages/Profile.jsx";
+import Friends from "./pages/Friends.jsx";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/balances" element={<Balances />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/friends" element={<Friends />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

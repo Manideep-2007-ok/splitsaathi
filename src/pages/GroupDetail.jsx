@@ -6,6 +6,7 @@ import { useExpenses } from "../hooks/useExpenses.js";
 import { useBalances } from "../hooks/useBalances.js";
 import { subscribeToGroup } from "../services/groups.js";
 import { deleteExpense } from "../services/expenses.js";
+import { fetchUserDocument } from "../services/users.js";
 import { formatCurrency } from "../utils/formatters.js";
 import ExpenseCard from "../components/expenses/ExpenseCard.jsx";
 import ExpenseForm from "../components/expenses/ExpenseForm.jsx";
@@ -24,12 +25,12 @@ function GroupDetail() {
   const toast = useToast();
   const [group, setGroup] = useState(null);
   const [groupLoading, setGroupLoading] = useState(true);
+  const [liveMemberDetails, setLiveMemberDetails] = useState({});
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("expenses");
   const [settleTransaction, setSettleTransaction] = useState(null);
   const { expenses, loading: expensesLoading } = useExpenses(groupId);
   const memberUids = group?.members ?? [];
-  const memberDetails = group?.memberDetails ?? {};
   const { simplifiedTransactions, netBalances, totalGroupSpend, hasDebts, loading: balancesLoading } = useBalances(groupId, memberUids);
 
   useEffect(() => {
@@ -38,6 +39,25 @@ function GroupDetail() {
     const unsubscribe = subscribeToGroup(groupId, (data) => { setGroup(data); setGroupLoading(false); }, (err) => { toast.danger(err ?? "Failed to load group"); setGroupLoading(false); });
     return unsubscribe;
   }, [groupId]);
+
+  useEffect(() => {
+    if (memberUids.length === 0) return;
+
+    const newUids = memberUids.filter((uid) => !liveMemberDetails[uid]);
+    if (newUids.length === 0) return;
+
+    Promise.all(newUids.map((uid) => fetchUserDocument(uid)))
+      .then((docs) => {
+        const updated = {};
+        docs.forEach((d) => {
+          if (d) updated[d.uid] = d;
+        });
+        setLiveMemberDetails((prev) => ({ ...prev, ...updated }));
+      })
+      .catch((err) => console.error("Failed to fetch member profiles:", err));
+  }, [JSON.stringify(memberUids)]);
+
+  const memberDetails = { ...(group?.memberDetails ?? {}), ...liveMemberDetails };
 
   const handleDeleteExpense = async (expense) => {
     try { await deleteExpense(groupId, expense.id, expense.amount); toast.success("Expense deleted"); }
@@ -58,7 +78,7 @@ function GroupDetail() {
       <div className="flex items-center gap-3">
         <button onClick={() => navigate("/dashboard")} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"><ArrowLeft className="w-5 h-5" /></button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] font-[Syne] truncate">{group?.name ?? "Group"}</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 truncate">{group?.name ?? "Group"}</h1>
           {group?.description && <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{group.description}</p>}
         </div>
         <Button onClick={() => setIsExpenseModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />} size="md">
@@ -75,7 +95,7 @@ function GroupDetail() {
         ].map((s) => (
           <div key={s.label} className="rounded-xl p-4 glass-card">
             <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-lg font-bold ${s.color ?? "text-[var(--text-primary)]"} ${s.mono ? "font-[JetBrains_Mono]" : "font-[Syne]"}`}>{s.value}</p>
+            <p className={`text-lg font-bold ${s.color ?? "text-slate-900 dark:text-slate-100"} ${s.mono ? "font-money" : ""}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -83,9 +103,9 @@ function GroupDetail() {
       <div className="flex gap-1 p-1 rounded-xl glass-card">
         {tabs.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 ${activeTab === tab.key ? "bg-[var(--accent-glow)] text-[var(--accent-light)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}>
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 ${activeTab === tab.key ? "bg-[var(--accent-glow)] text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}>
             <tab.icon className="w-3.5 h-3.5" />{tab.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? "bg-[var(--accent)]/20 text-[var(--accent-light)]" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"}`}>{tab.count}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? "bg-[var(--accent)]/10 text-[var(--accent)]" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"}`}>{tab.count}</span>
           </button>
         ))}
       </div>
@@ -106,7 +126,7 @@ function GroupDetail() {
           {balancesLoading && <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[var(--accent)] animate-spin" /></div>}
           {!balancesLoading && !hasDebts && (
             <div className="text-center py-12"><div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3"><ArrowRightLeft className="w-7 h-7 text-[var(--success)]" /></div>
-              <p className="text-sm font-medium text-[var(--success)]">All settled up! 🎉</p><p className="text-xs text-[var(--text-muted)] mt-1">No outstanding debts</p></div>
+              <p className="text-sm font-medium text-[var(--success)]">All settled up! 🎉</p></div>
           )}
           {!balancesLoading && simplifiedTransactions?.map((t, i) => {
             const fromName = memberDetails?.[t.from]?.displayName ?? "Someone";
@@ -116,11 +136,12 @@ function GroupDetail() {
             return (
               <div key={`${t.from}-${t.to}-${i}`} className="flex items-center gap-3 p-4 rounded-2xl glass-card">
                 <Avatar src={memberDetails?.[t.from]?.photoURL} name={fromName} size="sm" />
-                <div className="flex-1 min-w-0"><p className="text-sm text-[var(--text-primary)]">
+                <div className="flex-1 min-w-0"><p className="text-sm text-slate-900 dark:text-slate-100">
                   <span className={`font-medium ${isFrom ? "text-[var(--danger)]" : ""}`}>{isFrom ? "You" : fromName}</span>{" owes "}
                   <span className={`font-medium ${isTo ? "text-[var(--success)]" : ""}`}>{isTo ? "you" : toName}</span></p></div>
-                <p className="text-sm font-bold text-[var(--text-primary)] font-[JetBrains_Mono] shrink-0">{formatCurrency(t.amount)}</p>
-                {(isFrom || isTo) && <Button size="sm" variant={isFrom ? "primary" : "outline"} onClick={() => setSettleTransaction(t)}>Settle</Button>}
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 font-money shrink-0">{formatCurrency(t.amount)}</p>
+                {isFrom && <Button size="sm" variant="primary" onClick={() => setSettleTransaction(t)}>Settle</Button>}
+                {isTo && <Badge variant="accent" size="sm">Waiting for Payment</Badge>}
               </div>
             );
           })}
@@ -131,7 +152,7 @@ function GroupDetail() {
                 {Object.entries(netBalances ?? {}).map(([uid, bal]) => (
                   <div key={uid} className="flex items-center justify-between">
                     <span className="text-sm text-[var(--text-secondary)]">{uid === currentUser?.uid ? "You" : memberDetails?.[uid]?.displayName ?? "Unknown"}</span>
-                    <span className={`text-sm font-medium font-[JetBrains_Mono] ${bal > 0 ? "text-[var(--success)]" : bal < 0 ? "text-[var(--danger)]" : "text-[var(--text-muted)]"}`}>{bal > 0 ? "+" : ""}{formatCurrency(bal)}</span>
+                    <span className={`text-sm font-medium font-money ${bal > 0 ? "text-[var(--success)]" : bal < 0 ? "text-[var(--danger)]" : "text-[var(--text-muted)]"}`}>{bal > 0 ? "+" : ""}{formatCurrency(bal)}</span>
                   </div>
                 ))}
               </div>
@@ -149,7 +170,7 @@ function GroupDetail() {
                 <Avatar src={m?.photoURL} name={m?.displayName} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{m?.displayName ?? "Unknown"}{uid === currentUser?.uid && <span className="text-[var(--text-muted)]"> (you)</span>}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{m?.displayName ?? "Unknown"}{uid === currentUser?.uid && <span className="text-[var(--text-muted)]"> (you)</span>}</p>
                     {uid === group?.createdBy && <Badge variant="accent" size="sm">Admin</Badge>}
                   </div>
                   <p className="text-xs text-[var(--text-muted)] truncate">{m?.email ?? ""}</p>

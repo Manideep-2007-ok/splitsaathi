@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: [
     "./index.html",
     "./src/**/*.{js,jsx}",
@@ -7,27 +8,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        base: "var(--bg-base)",
-        surface: "var(--bg-surface)",
-        elevated: "var(--bg-elevated)",
-        subtle: "var(--bg-subtle)",
-        accent: {
-          DEFAULT: "var(--accent)",
-          light: "var(--accent-light)",
-          glow: "var(--accent-glow)",
+        base: "#F9F9F9",
+        surface: "#FFFFFF",
+        elevated: "#F3F4F6",
+        subtle: "#E5E7EB",
+        sky: {
+          brand: "#5AA9E6",
+          hover: "#7FC8F8",
+          glow: "rgba(90, 169, 230, 0.15)",
         },
-        success: "var(--success)",
-        danger: "var(--danger)",
-        warning: "var(--warning)",
+        gold: "#FFE45E",
+        rose: {
+          kiss: "#FF6392",
+        },
+        success: "#22C55E",
+        danger: "#FF6392",
+        warning: "#FFE45E",
       },
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
-        heading: ["Syne", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+        logo: ["Pacifico", "cursive"],
+        money: ["Space Grotesk", "sans-serif"],
       },
       borderColor: {
-        subtle: "var(--border-subtle)",
-        strong: "var(--border-strong)",
+        subtle: "rgba(0, 0, 0, 0.05)",
+        strong: "rgba(0, 0, 0, 0.10)",
       },
       animation: {
         fadeIn: "fadeIn 0.2s ease-out",

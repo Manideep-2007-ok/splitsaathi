@@ -4,7 +4,7 @@ const variantStyles = {
   default:
     "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-subtle)]",
   accent:
-    "bg-[var(--accent-glow)] text-[var(--accent-light)] border-[var(--accent)]/20",
+    "bg-[var(--accent-glow)] text-[var(--accent)] border-[var(--accent)]/20",
   success:
     "bg-emerald-500/10 text-[var(--success)] border-emerald-500/20",
   danger:
@@ -39,7 +39,7 @@ function Badge({
         <span
           className={clsx("w-1.5 h-1.5 rounded-full", {
             "bg-[var(--text-secondary)]": variant === "default",
-            "bg-[var(--accent-light)]": variant === "accent",
+            "bg-[var(--accent)]": variant === "accent",
             "bg-[var(--success)]": variant === "success",
             "bg-[var(--danger)]": variant === "danger",
             "bg-[var(--warning)]": variant === "warning",

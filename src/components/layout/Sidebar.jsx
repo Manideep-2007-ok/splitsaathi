@@ -3,19 +3,23 @@ import { NavLink, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { AuthContext } from "../../context/AuthContext.jsx";
 import { useToast } from "../../hooks/useToast.js";
+import { useTheme } from "../../hooks/useTheme.js";
 import Avatar from "../common/Avatar.jsx";
 import {
   LayoutDashboard,
   Wallet,
   BarChart3,
   UserCircle,
+  Users,
   LogOut,
   X,
-  Sparkles,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 const navigationItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/friends", label: "Friends", icon: Users },
   { path: "/balances", label: "Balances", icon: Wallet },
   { path: "/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/profile", label: "Profile", icon: UserCircle },
@@ -25,6 +29,7 @@ function Sidebar({ isOpen, onClose }) {
   const { userProfile, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const toast = useToast();
+  const { isDark, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -39,33 +44,42 @@ function Sidebar({ isOpen, onClose }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={clsx(
-          "fixed top-0 left-0 z-50 h-full w-72 bg-[#18181B]/60 backdrop-blur-xl border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto",
+          "fixed top-0 left-0 z-50 h-full w-72 bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[#6366F1] flex items-center justify-center shadow-lg shadow-[var(--accent-glow)]">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-extrabold text-[var(--text-primary)] font-[Syne] tracking-tight">
-              SplitSaathi
-            </span>
-          </div>
+          <span className="text-2xl font-logo text-[var(--accent)]">
+            SplitSaathi
+          </span>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors lg:hidden"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--bg-elevated)] transition-all duration-200"
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? (
+                <Sun className="w-4.5 h-4.5" />
+              ) : (
+                <Moon className="w-4.5 h-4.5" />
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors lg:hidden"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -78,8 +92,8 @@ function Sidebar({ isOpen, onClose }) {
                 clsx(
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
                   isActive
-                    ? "bg-[var(--accent-glow)] text-[var(--accent-light)] shadow-sm"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                    ? "bg-[var(--accent-glow)] text-[var(--accent)]"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-[var(--bg-elevated)]"
                 )
               }
             >
@@ -89,13 +103,13 @@ function Sidebar({ isOpen, onClose }) {
                     className={clsx(
                       "w-5 h-5 transition-colors",
                       isActive
-                        ? "text-[var(--accent-light)]"
-                        : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"
+                        ? "text-[var(--accent)]"
+                        : "text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
                     )}
                   />
                   {item.label}
                   {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent-light)]" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
                   )}
                 </>
               )}
@@ -111,7 +125,7 @@ function Sidebar({ isOpen, onClose }) {
               size="sm"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                 {userProfile?.displayName ?? "User"}
               </p>
               <p className="text-xs text-[var(--text-muted)] truncate">
@@ -122,7 +136,7 @@ function Sidebar({ isOpen, onClose }) {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--danger)] hover:bg-rose-500/10 transition-all duration-200"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--danger)] hover:bg-[#FF6392]/10 transition-all duration-200"
           >
             <LogOut className="w-4 h-4" />
             Sign Out

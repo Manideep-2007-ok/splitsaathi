@@ -65,7 +65,7 @@ function Toast({ id, type = "info", message, onDismiss }) {
 
         <button
           onClick={handleDismiss}
-          className="shrink-0 p-0.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 transition-colors"
+          className="shrink-0 p-0.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>

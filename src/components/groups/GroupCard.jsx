@@ -27,14 +27,14 @@ function GroupCard({ group, className }) {
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold text-[var(--text-primary)] font-[Syne] truncate group-hover:text-[var(--accent-light)] transition-colors">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-[var(--accent)] transition-colors">
             {groupName}
           </h3>
           {group?.description && (
             <p className="mt-1 text-xs text-[var(--text-muted)] truncate">{group.description}</p>
           )}
         </div>
-        <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-light)] group-hover:translate-x-0.5 transition-all shrink-0 ml-3" />
+        <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 transition-all shrink-0 ml-3" />
       </div>
 
       <div className="flex items-center gap-3 mb-4">
@@ -43,7 +43,7 @@ function GroupCard({ group, className }) {
             <Avatar key={member?.email ?? index} src={member?.photoURL} name={member?.displayName} size="xs" />
           ))}
           {remainingMemberCount > 0 && (
-            <div className="w-6 h-6 rounded-full bg-[var(--bg-elevated)] border-2 border-[var(--bg-surface)] flex items-center justify-center text-[9px] font-medium text-[var(--text-muted)]">
+            <div className="w-6 h-6 rounded-full bg-[var(--bg-elevated)] border-2 border-white flex items-center justify-center text-[9px] font-medium text-[var(--text-muted)]">
               +{remainingMemberCount}
             </div>
           )}
@@ -51,10 +51,10 @@ function GroupCard({ group, className }) {
         <Badge variant="default" size="sm"><Users className="w-3 h-3" />{formatMemberCount(memberCount)}</Badge>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/5">
+      <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
         <div>
           <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Total Spent</p>
-          <p className="text-sm font-medium text-[var(--text-primary)] font-[JetBrains_Mono]">{formatCurrency(totalExpenses)}</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 font-money">{formatCurrency(totalExpenses)}</p>
         </div>
         {updatedAt && <p className="text-[10px] text-[var(--text-muted)]">{formatRelativeTime(updatedAt)}</p>}
       </div>

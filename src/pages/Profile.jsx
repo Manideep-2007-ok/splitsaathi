@@ -37,7 +37,7 @@ function Profile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin" />
       </div>
     );
   }
@@ -45,127 +45,71 @@ function Profile() {
   return (
     <div className="max-w-xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-[Syne] tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
           Profile
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[var(--text-muted)] mt-1">
           Manage your account settings
         </p>
       </div>
 
-      <div className="rounded-2xl overflow-hidden bg-[#18181B]/60 backdrop-blur-xl border border-white/10 shadow-2xl">
-        <div className="relative h-24 bg-gradient-to-r from-purple-600 to-indigo-600">
+      <div className="rounded-2xl overflow-hidden glass-card">
+        <div className="relative h-24 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">
           <div className="absolute -bottom-10 left-6">
-            <Avatar
-              src={userProfile?.photoURL}
-              name={userProfile?.displayName}
-              size="xl"
-            />
+            <Avatar src={userProfile?.photoURL} name={userProfile?.displayName} size="xl" />
           </div>
         </div>
         <div className="pt-14 px-6 pb-6">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-lg font-bold text-white font-[Syne]">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {userProfile?.displayName ?? "User"}
             </h2>
-            {userProfile?.upiId && (
-              <Badge variant="success" size="sm" dot>
-                UPI
-              </Badge>
-            )}
+            {userProfile?.upiId && <Badge variant="success" size="sm" dot>UPI</Badge>}
           </div>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-slate-700 dark:text-slate-300">
             {userProfile?.email ?? ""}
           </p>
         </div>
       </div>
 
-      <form
-        onSubmit={handleSave}
-        className="rounded-2xl p-6 space-y-5 bg-[#18181B]/60 backdrop-blur-xl border border-white/10 shadow-2xl"
-      >
-        <h3 className="text-base font-bold text-white font-[Syne] mb-4">
+      <form onSubmit={handleSave} className="rounded-2xl p-6 space-y-5 glass-card">
+        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
           Edit Profile
         </h3>
-
-        <Input
-          label="Display Name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          leftIcon={<User className="w-4 h-4" />}
-          placeholder="Your name"
-          error={
-            displayName.length > 0 && displayName.trim().length === 0
-              ? "Name cannot be empty"
-              : undefined
-          }
-        />
-
+        <Input label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} leftIcon={<User className="w-4 h-4" />} placeholder="Your name" error={displayName.length > 0 && displayName.trim().length === 0 ? "Name cannot be empty" : undefined} />
         <div className="relative">
-          <Input
-            label="Email"
-            value={currentUser?.email ?? ""}
-            disabled
-            leftIcon={<Mail className="w-4 h-4" />}
-            helperText="Email is managed by Google"
-          />
-          <Shield className="absolute right-3 top-9 w-4 h-4 text-gray-500" />
+          <Input label="Email" value={currentUser?.email ?? ""} disabled leftIcon={<Mail className="w-4 h-4" />} helperText="Email is managed by Google" />
+          <Shield className="absolute right-3 top-9 w-4 h-4 text-[var(--text-muted)]" />
         </div>
-
-        <Input
-          label="UPI ID"
-          value={upiId}
-          onChange={(e) => setUpiId(e.target.value)}
-          leftIcon={<Smartphone className="w-4 h-4" />}
-          placeholder="yourname@upi"
-          error={upiError}
-          helperText={!upiError ? "Used for receiving settlements" : undefined}
-        />
-
-        <Button
-          type="submit"
-          disabled={!isFormValid}
-          isLoading={isSaving}
-          fullWidth
-          leftIcon={<Save className="w-4 h-4" />}
-        >
-          Save Changes
-        </Button>
+        <Input label="UPI ID" value={upiId} onChange={(e) => setUpiId(e.target.value)} leftIcon={<Smartphone className="w-4 h-4" />} placeholder="yourname@upi" error={upiError} helperText={!upiError ? "Used for receiving settlements" : undefined} />
+        <Button type="submit" disabled={!isFormValid} isLoading={isSaving} fullWidth leftIcon={<Save className="w-4 h-4" />}>Save Changes</Button>
       </form>
 
-      <div className="rounded-2xl p-6 bg-[#18181B]/60 backdrop-blur-xl border border-white/10 shadow-2xl">
-        <h3 className="text-base font-bold text-white font-[Syne] mb-4">
+      <div className="rounded-2xl p-6 glass-card">
+        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
           Account Info
         </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between py-2 border-b border-white/5">
-            <div className="flex items-center gap-2 text-sm text-gray-300">
-              <Shield className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
+              <Shield className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Auth Provider</span>
             </div>
             <Badge variant="accent" size="sm">Google</Badge>
           </div>
-
-          <div className="flex items-center justify-between py-2 border-b border-white/5">
-            <div className="flex items-center gap-2 text-sm text-gray-300">
-              <Calendar className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
+              <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Member Since</span>
             </div>
-            <span className="text-sm text-gray-200">
-              {formatDate(userProfile?.createdAt)}
-            </span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">{formatDate(userProfile?.createdAt)}</span>
           </div>
-
           <div className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-2 text-sm text-gray-300">
-              <Smartphone className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
+              <Smartphone className="w-4 h-4 text-[var(--text-muted)]" />
               <span>UPI Status</span>
             </div>
-            <Badge
-              variant={userProfile?.upiId ? "success" : "warning"}
-              size="sm"
-              dot
-            >
+            <Badge variant={userProfile?.upiId ? "success" : "warning"} size="sm" dot>
               {userProfile?.upiId ? "Connected" : "Not Set"}
             </Badge>
           </div>
