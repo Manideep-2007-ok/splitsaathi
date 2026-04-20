@@ -6,8 +6,8 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  onSnapshot,
   doc,
-  getDoc,
   updateDoc,
   serverTimestamp,
 } from "../services/firebase.js";
@@ -21,19 +21,40 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let profileUnsubscribe = null;
+
+    const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setCurrentUser(firebaseUser);
 
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+      if (profileUnsubscribe) {
+        profileUnsubscribe();
+        profileUnsubscribe = null;
+      }
 
-          if (userDocSnap.exists()) {
-            const profileData = { uid: firebaseUser.uid, ...userDocSnap.data() };
-            setUserProfile(profileData);
-            setProfileComplete(true);
-          } else {
+      if (firebaseUser) {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+
+        profileUnsubscribe = onSnapshot(
+          userDocRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              const profileData = { uid: firebaseUser.uid, ...docSnap.data() };
+              setUserProfile(profileData);
+              setProfileComplete(true);
+            } else {
+              setUserProfile({
+                uid: firebaseUser.uid,
+                displayName: firebaseUser.displayName ?? "",
+                email: firebaseUser.email ?? "",
+                photoURL: firebaseUser.photoURL ?? null,
+                upiId: "",
+              });
+              setProfileComplete(false);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Profile listener error:", error);
             setUserProfile({
               uid: firebaseUser.uid,
               displayName: firebaseUser.displayName ?? "",
@@ -42,27 +63,22 @@ function AuthProvider({ children }) {
               upiId: "",
             });
             setProfileComplete(false);
+            setLoading(false);
           }
-        } catch (fetchError) {
-          console.error("Profile fetch error:", fetchError);
-          setUserProfile({
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName ?? "",
-            email: firebaseUser.email ?? "",
-            photoURL: firebaseUser.photoURL ?? null,
-            upiId: "",
-          });
-          setProfileComplete(false);
-        }
+        );
       } else {
         setUserProfile(null);
         setProfileComplete(false);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      authUnsubscribe();
+      if (profileUnsubscribe) {
+        profileUnsubscribe();
+      }
+    };
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
@@ -91,7 +107,6 @@ function AuthProvider({ children }) {
       try {
         const userDocRef = doc(db, "users", currentUser.uid);
         await updateDoc(userDocRef, { ...profileUpdates, updatedAt: serverTimestamp() });
-        setUserProfile((prev) => ({ ...prev, ...profileUpdates }));
       } catch (error) {
         throw new Error(error?.message ?? "Failed to update profile");
       }
