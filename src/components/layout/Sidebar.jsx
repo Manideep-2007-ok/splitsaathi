@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import clsx from "clsx";
 import { AuthContext } from "../../context/AuthContext.jsx";
 import { useToast } from "../../hooks/useToast.js";
@@ -56,9 +56,13 @@ function Sidebar({ isOpen, onClose }) {
         )}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-          <span className="text-2xl font-logo text-[var(--accent)]">
+          <Link 
+            to="/dashboard" 
+            onClick={() => window.location.reload()} 
+            className="text-2xl font-logo text-[var(--accent)] hover:brightness-110 transition-all"
+          >
             SplitSaathi
-          </span>
+          </Link>
 
           <div className="flex items-center gap-1">
             <button

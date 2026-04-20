@@ -88,9 +88,9 @@ export async function acceptGroupInvitation(invitationId, groupId, userProfile) 
   try {
     const batch = writeBatch(db);
     
-    // Update invitation status
+    // Delete invitation
     const inviteRef = doc(db, "group_invitations", invitationId);
-    batch.update(inviteRef, { status: 'accepted', updatedAt: serverTimestamp() });
+    batch.delete(inviteRef);
 
     // Add user to group
     const groupRef = doc(db, "groups", groupId);
@@ -116,7 +116,7 @@ export async function acceptGroupInvitation(invitationId, groupId, userProfile) 
 export async function rejectGroupInvitation(invitationId) {
   try {
     const inviteRef = doc(db, "group_invitations", invitationId);
-    await updateDoc(inviteRef, { status: 'rejected', updatedAt: serverTimestamp() });
+    await deleteDoc(inviteRef);
   } catch (error) {
     throw new Error(error?.message ?? "Failed to reject invitation");
   }

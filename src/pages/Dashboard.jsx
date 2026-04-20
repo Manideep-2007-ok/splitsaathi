@@ -61,21 +61,6 @@ function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {summaryCards.map((card) => (
-          <div key={card.label} className="relative overflow-hidden rounded-2xl p-5 glass-card">
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.08] rounded-full -translate-y-6 translate-x-6`} />
-            <div className="relative">
-              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} mb-3`}>
-                <card.icon className="w-5 h-5 text-white" />
-              </div>
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">{card.label}</p>
-              <p className={`text-xl font-bold text-slate-900 dark:text-slate-100 ${card.isMoney ? "font-money" : ""}`}>{card.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {invitations?.length > 0 && (
         <div className="bg-[var(--bg-elevated)] p-6 rounded-2xl border border-[var(--border-subtle)]">
           <h2 className="text-2xl font-logo text-slate-900 dark:text-slate-100 mb-4 tracking-wide">Invitations</h2>
@@ -94,8 +79,9 @@ function Dashboard() {
                     <Check className="w-4 h-4 mr-1" />
                     Accept
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleRejectInvite(invite)}>
-                    <X className="w-4 h-4 text-[var(--danger)]" />
+                  <Button size="sm" onClick={() => handleRejectInvite(invite)} className="bg-[#FF6392] text-white font-bold hover:brightness-110">
+                    <X className="w-4 h-4 mr-1" />
+                    Decline
                   </Button>
                 </div>
               </div>
@@ -104,6 +90,20 @@ function Dashboard() {
         </div>
       )}
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {summaryCards.map((card) => (
+          <div key={card.label} className="relative overflow-hidden rounded-2xl p-5 glass-card">
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} opacity-[0.08] rounded-full -translate-y-6 translate-x-6`} />
+            <div className="relative">
+              <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} mb-3`}>
+                <card.icon className="w-5 h-5 text-white" />
+              </div>
+              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">{card.label}</p>
+              <p className={`text-xl font-bold text-slate-900 dark:text-slate-100 ${card.isMoney ? "font-money" : ""}`}>{card.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Your Groups</h2>

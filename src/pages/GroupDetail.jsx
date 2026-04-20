@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext.jsx";
 import { useToast } from "../hooks/useToast.js";
 import { useExpenses } from "../hooks/useExpenses.js";
 import { useBalances } from "../hooks/useBalances.js";
-import { subscribeToGroup } from "../services/groups.js";
+import { subscribeToGroup, deleteGroup } from "../services/groups.js";
 import { deleteExpense } from "../services/expenses.js";
 import { fetchUserDocument } from "../services/users.js";
 import { formatCurrency } from "../utils/formatters.js";
@@ -16,7 +16,7 @@ import Button from "../components/common/Button.jsx";
 import Modal from "../components/common/Modal.jsx";
 import SkeletonCard from "../components/common/SkeletonCard.jsx";
 import SettleModal from "../components/settlement/SettleModal.jsx";
-import { Plus, ArrowLeft, Users, Receipt, ArrowRightLeft, Loader2 } from "lucide-react";
+import { Plus, ArrowLeft, Users, Receipt, ArrowRightLeft, Loader2, Trash2, AlertTriangle } from "lucide-react";
 
 function GroupDetail() {
   const { id: groupId } = useParams();
@@ -27,6 +27,8 @@ function GroupDetail() {
   const [groupLoading, setGroupLoading] = useState(true);
   const [liveMemberDetails, setLiveMemberDetails] = useState({});
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
   const [activeTab, setActiveTab] = useState("expenses");
   const [settleTransaction, setSettleTransaction] = useState(null);
   const { expenses, loading: expensesLoading } = useExpenses(groupId);
@@ -64,6 +66,19 @@ function GroupDetail() {
     catch (error) { toast.danger(error?.message ?? "Failed to delete expense"); }
   };
 
+  const handleDeleteGroup = async () => {
+    setIsDeletingGroup(true);
+    try {
+      await deleteGroup(groupId);
+      toast.success("Group deleted successfully");
+      navigate("/dashboard");
+    } catch (error) {
+      toast.danger(error?.message ?? "Failed to delete group");
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  };
+
   if (groupLoading) return <div className="space-y-6"><SkeletonCard rows={2} /><SkeletonCard rows={4} /></div>;
   if (!group) return <div className="text-center py-20"><p className="text-[var(--text-muted)]">Group not found</p><Button variant="ghost" onClick={() => navigate("/dashboard")} className="mt-4">Back to Dashboard</Button></div>;
 
@@ -81,9 +96,16 @@ function GroupDetail() {
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 truncate">{group?.name ?? "Group"}</h1>
           {group?.description && <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{group.description}</p>}
         </div>
-        <Button onClick={() => setIsExpenseModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />} size="md">
-          <span className="hidden sm:inline">Add Expense</span><span className="sm:hidden">Add</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {group?.createdBy === currentUser?.uid && (
+            <button onClick={() => setIsDeleteModalOpen(true)} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-white hover:bg-[var(--danger)] transition-colors">
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+          <Button onClick={() => setIsExpenseModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />} size="md">
+            <span className="hidden sm:inline">Add Expense</span><span className="sm:hidden">Add</span>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -186,6 +208,26 @@ function GroupDetail() {
         <ExpenseForm groupId={groupId} members={memberUids} memberDetails={memberDetails} onSuccess={() => setIsExpenseModalOpen(false)} onCancel={() => setIsExpenseModalOpen(false)} />
       </Modal>
       <SettleModal isOpen={!!settleTransaction} onClose={() => setSettleTransaction(null)} groupId={groupId} groupName={group?.name} transaction={settleTransaction} memberDetails={memberDetails} />
+
+      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Group" size="md">
+        <div className="p-4 sm:p-6 text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[var(--danger)]/10 text-[var(--danger)] flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Are you sure?</h3>
+            <p className="text-sm text-[var(--text-secondary)] mt-2">
+              This will permanently delete <span className="font-semibold text-slate-900 dark:text-slate-100">{group?.name}</span>, all its expenses, and settlement data. This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)} fullWidth>Cancel</Button>
+            <Button onClick={handleDeleteGroup} isLoading={isDeletingGroup} className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-white" fullWidth>
+              Yes, Delete Group
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
