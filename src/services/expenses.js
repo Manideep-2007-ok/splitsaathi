@@ -157,8 +157,11 @@ export async function deleteExpense(groupId, expenseId, expenseAmount, requester
       throw new Error("Expense not found");
     }
 
-    if (expenseSnap.data().createdBy !== requesterUid) {
-      throw new Error("Only the creator of this expense can delete it");
+    const expenseData = expenseSnap.data();
+    console.log('Current User:', requesterUid, 'Expense Paid By:', expenseData.paidBy);
+
+    if (expenseData.paidBy !== requesterUid) {
+      throw new Error("Only the person who paid for this expense can delete it");
     }
 
     const batch = writeBatch(db);

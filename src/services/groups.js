@@ -20,6 +20,7 @@ import {
 
 export async function createGroup(groupData, currentUser) {
   try {
+    const batch = writeBatch(db);
     const groupRef = doc(collection(db, "groups"));
 
     const creatorDetail = {
@@ -29,38 +30,119 @@ export async function createGroup(groupData, currentUser) {
       upiId: currentUser?.upiId ?? "",
     };
 
+    // Only the creator is added initially
     const memberDetailsMap = {
       [currentUser.uid]: creatorDetail,
     };
-
-    (groupData.invitedMembers ?? []).forEach((member) => {
-      memberDetailsMap[member.uid] = {
-        displayName: member?.displayName ?? "Unknown",
-        email: member?.email ?? "",
-        photoURL: member?.photoURL ?? null,
-        upiId: member?.upiId ?? "",
-      };
-    });
-
-    const memberUids = Object.keys(memberDetailsMap);
 
     const newGroup = {
       name: (groupData.name ?? "").trim(),
       description: (groupData.description ?? "").trim(),
       createdBy: currentUser.uid,
-      members: memberUids,
+      members: [currentUser.uid],
       memberDetails: memberDetailsMap,
       totalExpenses: 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
-    await setDoc(groupRef, newGroup);
+    batch.set(groupRef, newGroup);
 
+    // Send invitations to invited members
+    (groupData.invitedMembers ?? []).forEach((member) => {
+      const inviteRef = doc(collection(db, "group_invitations"));
+      batch.set(inviteRef, {
+        groupId: groupRef.id,
+        groupName: newGroup.name,
+        invitedUserId: member.uid,
+        senderId: currentUser.uid,
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+    });
+
+    await batch.commit();
     return { id: groupRef.id, ...newGroup };
   } catch (error) {
     throw new Error(error?.message ?? "Failed to create group");
   }
+}
+
+export async function inviteUserToGroup(groupId, groupName, invitedUser, senderId) {
+  try {
+    const inviteRef = doc(collection(db, "group_invitations"));
+    await setDoc(inviteRef, {
+      groupId,
+      groupName,
+      invitedUserId: invitedUser.uid,
+      senderId,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    throw new Error(error?.message ?? "Failed to invite user");
+  }
+}
+
+export async function acceptGroupInvitation(invitationId, groupId, userProfile) {
+  try {
+    const batch = writeBatch(db);
+    
+    // Update invitation status
+    const inviteRef = doc(db, "group_invitations", invitationId);
+    batch.update(inviteRef, { status: 'accepted', updatedAt: serverTimestamp() });
+
+    // Add user to group
+    const groupRef = doc(db, "groups", groupId);
+    const memberDetail = {
+      displayName: userProfile?.displayName ?? "Unknown",
+      email: userProfile?.email ?? "",
+      photoURL: userProfile?.photoURL ?? null,
+      upiId: userProfile?.upiId ?? "",
+    };
+    
+    batch.update(groupRef, {
+      members: arrayUnion(userProfile.uid),
+      [`memberDetails.${userProfile.uid}`]: memberDetail,
+      updatedAt: serverTimestamp(),
+    });
+
+    await batch.commit();
+  } catch (error) {
+    throw new Error(error?.message ?? "Failed to accept invitation");
+  }
+}
+
+export async function rejectGroupInvitation(invitationId) {
+  try {
+    const inviteRef = doc(db, "group_invitations", invitationId);
+    await updateDoc(inviteRef, { status: 'rejected', updatedAt: serverTimestamp() });
+  } catch (error) {
+    throw new Error(error?.message ?? "Failed to reject invitation");
+  }
+}
+
+export function subscribeToGroupInvitations(uid, onData, onError) {
+  const invitesQuery = query(
+    collection(db, "group_invitations"),
+    where("invitedUserId", "==", uid),
+    where("status", "==", "pending"),
+    orderBy("createdAt", "desc")
+  );
+
+  return onSnapshot(
+    invitesQuery,
+    (snapshot) => {
+      const invites = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      onData(invites);
+    },
+    (error) => {
+      onError?.(error?.message ?? "Failed to load invitations");
+    }
+  );
 }
 
 export async function fetchGroup(groupId) {

@@ -60,7 +60,7 @@ function GroupDetail() {
   const memberDetails = { ...(group?.memberDetails ?? {}), ...liveMemberDetails };
 
   const handleDeleteExpense = async (expense) => {
-    try { await deleteExpense(groupId, expense.id, expense.amount); toast.success("Expense deleted"); }
+    try { await deleteExpense(groupId, expense.id, expense.amount, currentUser?.uid); toast.success("Expense deleted"); }
     catch (error) { toast.danger(error?.message ?? "Failed to delete expense"); }
   };
 
@@ -117,7 +117,7 @@ function GroupDetail() {
             <div className="text-center py-12"><Receipt className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-3" /><p className="text-sm text-[var(--text-muted)] mb-4">No expenses yet</p>
               <Button onClick={() => setIsExpenseModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />} size="sm">Add First Expense</Button></div>
           )}
-          {!expensesLoading && expenses?.map((e) => (<ExpenseCard key={e.id} expense={e} memberDetails={memberDetails} currentUserUid={currentUser?.uid} onDelete={handleDeleteExpense} />))}
+          {!expensesLoading && expenses?.map((e) => (<ExpenseCard key={e.id} expense={e} memberDetails={memberDetails} currentUserUid={currentUser?.uid} isGroupAdmin={group?.createdBy === currentUser?.uid} onDelete={handleDeleteExpense} />))}
         </div>
       )}
 

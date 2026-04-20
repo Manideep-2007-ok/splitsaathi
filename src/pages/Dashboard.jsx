@@ -1,23 +1,44 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useGroups } from "../hooks/useGroups.js";
+import { acceptGroupInvitation, rejectGroupInvitation } from "../services/groups.js";
+import { useToast } from "../hooks/useToast.js";
 import { getFirstName, formatCurrency } from "../utils/formatters.js";
 import GroupCard from "../components/groups/GroupCard.jsx";
 import GroupForm from "../components/groups/GroupForm.jsx";
 import Modal from "../components/common/Modal.jsx";
 import Button from "../components/common/Button.jsx";
 import SkeletonCard from "../components/common/SkeletonCard.jsx";
-import { Plus, Users, Wallet, TrendingUp } from "lucide-react";
+import { Plus, Users, Wallet, TrendingUp, Check, X, Clock } from "lucide-react";
 
 function Dashboard() {
   const { currentUser, userProfile } = useContext(AuthContext);
-  const { groups, loading, error } = useGroups(currentUser?.uid);
+  const toast = useToast();
+  const { groups, invitations, loading, error } = useGroups(currentUser?.uid);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const firstName = getFirstName(userProfile?.displayName);
   const totalGroups = groups?.length ?? 0;
   const totalSpent = (groups ?? []).reduce((s, g) => s + (g?.totalExpenses ?? 0), 0);
   const totalMembers = new Set((groups ?? []).flatMap((g) => g?.members ?? [])).size;
+
+  const handleAcceptInvite = async (invite) => {
+    try {
+      await acceptGroupInvitation(invite.id, invite.groupId, userProfile);
+      toast.success("Joined group!");
+    } catch (err) {
+      toast.danger("Failed to join group");
+    }
+  };
+
+  const handleRejectInvite = async (invite) => {
+    try {
+      await rejectGroupInvitation(invite.id);
+      toast.success("Invitation rejected");
+    } catch (err) {
+      toast.danger("Failed to reject invitation");
+    }
+  };
 
   const summaryCards = [
     { label: "Total Groups", value: totalGroups, icon: Users, color: "from-[var(--accent)] to-[var(--accent-light)]" },
@@ -54,6 +75,34 @@ function Dashboard() {
           </div>
         ))}
       </div>
+
+      {invitations?.length > 0 && (
+        <div className="bg-[var(--bg-elevated)] p-6 rounded-2xl border border-[var(--border-subtle)]">
+          <h2 className="text-2xl font-logo text-slate-900 dark:text-slate-100 mb-4 tracking-wide">Invitations</h2>
+          <div className="space-y-3">
+            {invitations.map((invite) => (
+              <div key={invite.id} className="flex items-center justify-between p-4 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-subtle)]">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{invite.groupName}</h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Clock className="w-3 h-3 text-[#FFE45E]" />
+                    <span className="text-xs font-semibold text-[#FFE45E]">Pending</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleAcceptInvite(invite)} className="bg-[#5AA9E6] text-slate-900 font-bold hover:brightness-110">
+                    <Check className="w-4 h-4 mr-1" />
+                    Accept
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleRejectInvite(invite)}>
+                    <X className="w-4 h-4 text-[var(--danger)]" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div>
         <div className="flex items-center justify-between mb-4">

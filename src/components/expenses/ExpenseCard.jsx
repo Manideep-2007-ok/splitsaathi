@@ -5,7 +5,7 @@ import { formatCurrency, formatRelativeTime } from "../../utils/formatters.js";
 import { getCategoryByValue } from "../../services/expenses.js";
 import { Trash2 } from "lucide-react";
 
-function ExpenseCard({ expense, memberDetails, currentUserUid, onDelete, className }) {
+function ExpenseCard({ expense, memberDetails, currentUserUid, isGroupAdmin, onDelete, className }) {
   const title = expense?.title ?? "Untitled";
   const amount = expense?.amount ?? 0;
   const paidByUid = expense?.paidBy ?? "";
@@ -16,6 +16,8 @@ function ExpenseCard({ expense, memberDetails, currentUserUid, onDelete, classNa
   const paidByName = paidByMember?.displayName ?? "Someone";
   const isPaidByCurrentUser = paidByUid === currentUserUid;
   const currentUserSplit = splits?.[currentUserUid] ?? 0;
+
+  const canDelete = expense?.paidBy === currentUserUid;
 
   return (
     <div className={clsx("rounded-2xl p-4 glass-card group", className)}>
@@ -45,7 +47,7 @@ function ExpenseCard({ expense, memberDetails, currentUserUid, onDelete, classNa
             <Badge variant="default" size="sm">{category?.label ?? "General"}</Badge>
             <Badge variant="accent" size="sm">{expense?.splitType ?? "equal"}</Badge>
             {createdAt && <span className="text-[10px] text-[var(--text-muted)] ml-auto">{formatRelativeTime(createdAt)}</span>}
-            {onDelete && currentUserUid === expense?.createdBy && (
+            {onDelete && canDelete && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(expense); }}
                 className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[#FF6392]/10 transition-colors opacity-0 group-hover:opacity-100"

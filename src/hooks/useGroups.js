@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { subscribeToUserGroups } from "../services/groups.js";
+import { subscribeToUserGroups, subscribeToGroupInvitations } from "../services/groups.js";
 
 export function useGroups(uid) {
   const [groups, setGroups] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!uid) {
       setGroups([]);
+      setInvitations([]);
       setLoading(false);
       return;
     }
@@ -16,7 +18,7 @@ export function useGroups(uid) {
     setLoading(true);
     setError(null);
 
-    const unsubscribe = subscribeToUserGroups(
+    const unsubscribeGroups = subscribeToUserGroups(
       uid,
       (fetchedGroups) => {
         setGroups(fetchedGroups);
@@ -28,8 +30,21 @@ export function useGroups(uid) {
       }
     );
 
-    return unsubscribe;
+    const unsubscribeInvites = subscribeToGroupInvitations(
+      uid,
+      (fetchedInvites) => {
+        setInvitations(fetchedInvites);
+      },
+      (errorMessage) => {
+        console.error("Failed to fetch invites:", errorMessage);
+      }
+    );
+
+    return () => {
+      unsubscribeGroups();
+      unsubscribeInvites();
+    };
   }, [uid]);
 
-  return { groups, loading, error };
+  return { groups, invitations, loading, error };
 }
