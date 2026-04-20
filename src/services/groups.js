@@ -56,6 +56,9 @@ export async function createGroup(groupData, currentUser) {
         groupId: groupRef.id,
         groupName: newGroup.name,
         invitedUserId: member.uid,
+        invitedUserEmail: (member.email ?? "").toLowerCase(),
+        inviterId: currentUser.uid,
+        inviterName: currentUser.displayName ?? "Someone",
         senderId: currentUser.uid,
         status: 'pending',
         createdAt: serverTimestamp()
@@ -76,6 +79,9 @@ export async function inviteUserToGroup(groupId, groupName, invitedUser, senderI
       groupId,
       groupName,
       invitedUserId: invitedUser.uid,
+      invitedUserEmail: (invitedUser.email ?? "").toLowerCase(),
+      inviterId: senderId,
+      inviterName: invitedUser.inviterName ?? "Someone",
       senderId,
       status: 'pending',
       createdAt: serverTimestamp()
@@ -123,27 +129,78 @@ export async function rejectGroupInvitation(invitationId) {
   }
 }
 
-export function subscribeToGroupInvitations(uid, onData, onError) {
-  const invitesQuery = query(
+export function subscribeToGroupInvitations(uid, email, onData, onError) {
+  let uidResults = [];
+  let emailResults = [];
+
+  function mergeAndEmit() {
+    const seen = new Set();
+    const merged = [];
+    for (const inv of [...uidResults, ...emailResults]) {
+      if (!seen.has(inv.id)) {
+        seen.add(inv.id);
+        merged.push(inv);
+      }
+    }
+    merged.sort((a, b) => {
+      const aTime = a.createdAt?.seconds ?? 0;
+      const bTime = b.createdAt?.seconds ?? 0;
+      return bTime - aTime;
+    });
+    onData(merged);
+  }
+
+  // Query 1: by UID
+  const uidQuery = query(
     collection(db, "group_invitations"),
     where("invitedUserId", "==", uid),
-    where("status", "==", "pending"),
-    orderBy("createdAt", "desc")
+    where("status", "==", "pending")
   );
 
-  return onSnapshot(
-    invitesQuery,
+  const unsubUid = onSnapshot(
+    uidQuery,
     (snapshot) => {
-      const invites = snapshot.docs.map((docSnap) => ({
+      uidResults = snapshot.docs.map((docSnap) => ({
         id: docSnap.id,
         ...docSnap.data(),
       }));
-      onData(invites);
+      mergeAndEmit();
     },
     (error) => {
       onError?.(error?.message ?? "Failed to load invitations");
     }
   );
+
+  // Query 2: by email (lowercase)
+  const normalizedEmail = (email ?? "").toLowerCase();
+  let unsubEmail = () => {};
+
+  if (normalizedEmail) {
+    const emailQuery = query(
+      collection(db, "group_invitations"),
+      where("invitedUserEmail", "==", normalizedEmail),
+      where("status", "==", "pending")
+    );
+
+    unsubEmail = onSnapshot(
+      emailQuery,
+      (snapshot) => {
+        emailResults = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }));
+        mergeAndEmit();
+      },
+      (error) => {
+        console.error("Email invite query error:", error?.message);
+      }
+    );
+  }
+
+  return () => {
+    unsubUid();
+    unsubEmail();
+  };
 }
 
 export async function fetchGroup(groupId) {

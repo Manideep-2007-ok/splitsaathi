@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { subscribeToUserGroups, subscribeToGroupInvitations } from "../services/groups.js";
 
-export function useGroups(uid) {
+export function useGroups(uid, email) {
   const [groups, setGroups] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +32,7 @@ export function useGroups(uid) {
 
     const unsubscribeInvites = subscribeToGroupInvitations(
       uid,
+      email,
       (fetchedInvites) => {
         setInvitations(fetchedInvites);
       },
@@ -44,7 +45,7 @@ export function useGroups(uid) {
       unsubscribeGroups();
       unsubscribeInvites();
     };
-  }, [uid]);
+  }, [uid, email]);
 
   return { groups, invitations, loading, error };
 }

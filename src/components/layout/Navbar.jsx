@@ -8,7 +8,7 @@ import Button from "../common/Button.jsx";
 
 function Navbar() {
   const { currentUser, userProfile } = useContext(AuthContext);
-  const { invitations } = useGroups(currentUser?.uid);
+  const { invitations } = useGroups(currentUser?.uid, currentUser?.email);
   const toast = useToast();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
