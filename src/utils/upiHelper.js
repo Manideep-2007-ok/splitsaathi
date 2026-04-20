@@ -1,27 +1,48 @@
-const UPI_BASE_URL = "upi://pay";
+const UPI_BASE = "upi://pay";
+const MIN_AMOUNT = 1.0;
 
-export function buildUpiDeepLink({ upiId, payeeName, amount, transactionNote }) {
-  if (!upiId || !amount) {
-    return null;
+function sanitizeAmount(amount) {
+  const parsed = parseFloat(amount);
+  if (isNaN(parsed) || parsed < MIN_AMOUNT) {
+    return MIN_AMOUNT.toFixed(2);
   }
-
-  const sanitizedPayeeName = encodeURIComponent(
-    (payeeName ?? "SplitSaathi User").trim()
-  );
-
-  const sanitizedNote = encodeURIComponent(
-    (transactionNote ?? "SplitSaathi Settlement").trim()
-  );
-
-  const formattedAmount = parseFloat(amount).toFixed(2);
-
-  const trimmedUpiId = upiId.trim();
-
-  return `${UPI_BASE_URL}?pa=${trimmedUpiId}&pn=${sanitizedPayeeName}&am=${formattedAmount}&cu=INR&tn=${sanitizedNote}`;
+  return parsed.toFixed(2);
 }
 
-export function buildUpiQrString({ upiId, payeeName, amount, transactionNote }) {
-  return buildUpiDeepLink({ upiId, payeeName, amount, transactionNote });
+function sanitizeVpa(upiId) {
+  return (upiId ?? "").trim();
+}
+
+export function buildUpiCleanLink({ upiId, amount }) {
+  const vpa = sanitizeVpa(upiId);
+  if (!vpa) return null;
+
+  const safeAmount = sanitizeAmount(amount);
+
+  return `${UPI_BASE}?pa=${vpa}&am=${safeAmount}&cu=INR`;
+}
+
+export function buildUpiDeepLink({ upiId, payeeName, amount, transactionNote }) {
+  const vpa = sanitizeVpa(upiId);
+  if (!vpa) return null;
+
+  const safeAmount = sanitizeAmount(amount);
+
+  const params = [`pa=${vpa}`, `am=${safeAmount}`, `cu=INR`];
+
+  if (payeeName && payeeName.trim().length > 0) {
+    params.push(`pn=${encodeURIComponent(payeeName.trim())}`);
+  }
+
+  if (transactionNote && transactionNote.trim().length > 0) {
+    params.push(`tn=${encodeURIComponent(transactionNote.trim())}`);
+  }
+
+  return `${UPI_BASE}?${params.join("&")}`;
+}
+
+export function buildUpiQrString({ upiId, amount }) {
+  return buildUpiCleanLink({ upiId, amount });
 }
 
 export function isValidUpiId(upiId) {
@@ -46,5 +67,5 @@ export function generateTransactionNote(payerName, payeeName, groupName) {
   const payee = (payeeName ?? "Someone").split(" ")[0];
   const group = groupName ?? "group";
 
-  return `${payer} paid ${payee} - ${group} (via SplitSaathi)`;
+  return `${payer} paid ${payee} - ${group}`;
 }

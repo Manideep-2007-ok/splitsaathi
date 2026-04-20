@@ -1,5 +1,5 @@
 import Button from "../common/Button.jsx";
-import { buildUpiDeepLink } from "../../utils/upiHelper.js";
+import { buildUpiCleanLink } from "../../utils/upiHelper.js";
 import { formatCurrency } from "../../utils/formatters.js";
 import { Smartphone } from "lucide-react";
 
@@ -7,16 +7,10 @@ function UpiButton({
   upiId,
   payeeName,
   amount,
-  transactionNote,
   onSettle,
   isLoading,
 }) {
-  const upiDeepLink = buildUpiDeepLink({
-    upiId,
-    payeeName,
-    amount,
-    transactionNote,
-  });
+  const upiDeepLink = buildUpiCleanLink({ upiId, amount });
 
   const handlePayViaUpi = () => {
     onSettle?.();
@@ -30,14 +24,14 @@ function UpiButton({
 
   return (
     <div className="space-y-4 text-center">
-      <div className="flex items-center justify-center gap-2 text-[var(--text-secondary)]">
+      <div className="flex items-center justify-center gap-2 text-gray-300">
         <Smartphone className="w-5 h-5" />
         <p className="text-sm font-medium">Pay via UPI App</p>
       </div>
 
-      <p className="text-xs text-[var(--text-muted)]">
-        Tap the button below to open your UPI app and pay{" "}
-        <span className="font-[JetBrains_Mono] text-[var(--text-primary)]">
+      <p className="text-xs text-gray-400">
+        Tap below to open your UPI app and pay{" "}
+        <span className="font-[JetBrains_Mono] text-white">
           {formatCurrency(amount)}
         </span>{" "}
         to {payeeName}
@@ -48,12 +42,12 @@ function UpiButton({
         isLoading={isLoading}
         fullWidth
         size="lg"
-        className="bg-gradient-to-r from-[var(--accent)] to-[#6366F1]"
+        className="bg-gradient-to-r from-purple-600 to-indigo-600"
       >
         Pay {formatCurrency(amount)} via UPI
       </Button>
 
-      <p className="text-[10px] text-[var(--text-muted)]">
+      <p className="text-[10px] text-gray-500">
         UPI ID: {upiId}
       </p>
     </div>

@@ -4,7 +4,7 @@ import { useDevice } from "../../hooks/useDevice.js";
 import { addSettlement } from "../../services/settlements.js";
 import { fetchUserDocument } from "../../services/users.js";
 import { formatCurrency } from "../../utils/formatters.js";
-import { generateTransactionNote } from "../../utils/upiHelper.js";
+
 import Modal from "../common/Modal.jsx";
 import Avatar from "../common/Avatar.jsx";
 import Button from "../common/Button.jsx";
@@ -66,7 +66,7 @@ function SettleModal({
   const toName = toMember?.displayName ?? "Someone";
   const toUpiId = toMember?.upiId ?? "";
 
-  const transactionNote = generateTransactionNote(fromName, toName, groupName);
+
 
   const handleSettleUp = async (method = "upi") => {
     setIsSettling(true);
@@ -133,7 +133,6 @@ function SettleModal({
               upiId={toUpiId}
               payeeName={toName}
               amount={amount}
-              transactionNote={transactionNote}
               onSettle={() => handleSettleUp("upi")}
               isLoading={isSettling}
             />
@@ -142,7 +141,6 @@ function SettleModal({
               upiId={toUpiId}
               payeeName={toName}
               amount={amount}
-              transactionNote={transactionNote}
             />
           ) : (
             <div className="text-center py-4">
