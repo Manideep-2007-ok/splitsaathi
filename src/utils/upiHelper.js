@@ -15,7 +15,9 @@ export function buildUpiDeepLink({ upiId, payeeName, amount, transactionNote }) 
 
   const formattedAmount = parseFloat(amount).toFixed(2);
 
-  return `${UPI_BASE_URL}?pa=${encodeURIComponent(upiId)}&pn=${sanitizedPayeeName}&am=${formattedAmount}&cu=INR&tn=${sanitizedNote}`;
+  const trimmedUpiId = upiId.trim();
+
+  return `${UPI_BASE_URL}?pa=${trimmedUpiId}&pn=${sanitizedPayeeName}&am=${formattedAmount}&cu=INR&tn=${sanitizedNote}`;
 }
 
 export function buildUpiQrString({ upiId, payeeName, amount, transactionNote }) {
