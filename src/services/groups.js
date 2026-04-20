@@ -2,6 +2,7 @@ import {
   db,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -175,8 +176,15 @@ export async function updateGroup(groupId, updates) {
 export async function deleteGroup(groupId) {
   try {
     const batch = writeBatch(db);
-    const groupRef = doc(db, "groups", groupId);
+    
+    // Clean up expenses
+    const expensesRef = collection(db, "groups", groupId, "expenses");
+    const expensesSnap = await getDocs(expensesRef);
+    expensesSnap.forEach((expenseDoc) => {
+      batch.delete(expenseDoc.ref);
+    });
 
+    const groupRef = doc(db, "groups", groupId);
     batch.delete(groupRef);
 
     await batch.commit();

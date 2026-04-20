@@ -28,13 +28,13 @@ function ExpenseCard({ expense, memberDetails, currentUserUid, isGroupAdmin, onD
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{title}</h4>
+              <h4 className="text-sm font-semibold text-[#1F2937] dark:text-slate-100 truncate">{title}</h4>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 {isPaidByCurrentUser ? "You" : paidByName} paid
               </p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 font-money">{formatCurrency(amount)}</p>
+              <p className="text-sm font-semibold text-[#1F2937] dark:text-slate-100 font-money">{formatCurrency(amount)}</p>
               {currentUserSplit > 0 && !isPaidByCurrentUser && (
                 <p className="text-[10px] text-[var(--danger)] font-money mt-0.5">you owe {formatCurrency(currentUserSplit)}</p>
               )}

@@ -27,7 +27,7 @@ function GroupCard({ group, className }) {
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-[var(--accent)] transition-colors">
+          <h3 className="text-base font-bold !text-[#1F2937] dark:!text-white truncate group-hover:text-[var(--accent)] transition-colors">
             {groupName}
           </h3>
           {group?.description && (
@@ -54,7 +54,7 @@ function GroupCard({ group, className }) {
       <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
         <div>
           <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Total Spent</p>
-          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 font-money">{formatCurrency(totalExpenses)}</p>
+          <p className="text-sm font-medium !text-[#1F2937] dark:!text-white font-money">{formatCurrency(totalExpenses)}</p>
         </div>
         {updatedAt && <p className="text-[10px] text-[var(--text-muted)]">{formatRelativeTime(updatedAt)}</p>}
       </div>

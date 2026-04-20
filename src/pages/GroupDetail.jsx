@@ -93,7 +93,7 @@ function GroupDetail() {
       <div className="flex items-center gap-3">
         <button onClick={() => navigate("/dashboard")} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"><ArrowLeft className="w-5 h-5" /></button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 truncate">{group?.name ?? "Group"}</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#1F2937] dark:text-slate-100 truncate">{group?.name ?? "Group"}</h1>
           {group?.description && <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{group.description}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ function GroupDetail() {
         ].map((s) => (
           <div key={s.label} className="rounded-xl p-4 glass-card">
             <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-lg font-bold ${s.color ?? "text-slate-900 dark:text-slate-100"} ${s.mono ? "font-money" : ""}`}>{s.value}</p>
+            <p className={`text-lg font-bold ${s.color ?? "text-[#1F2937] dark:text-slate-100"} ${s.mono ? "font-money" : ""}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -158,22 +158,22 @@ function GroupDetail() {
             return (
               <div key={`${t.from}-${t.to}-${i}`} className="flex items-center gap-3 p-4 rounded-2xl glass-card">
                 <Avatar src={memberDetails?.[t.from]?.photoURL} name={fromName} size="sm" />
-                <div className="flex-1 min-w-0"><p className="text-sm text-slate-900 dark:text-slate-100">
-                  <span className={`font-medium ${isFrom ? "text-[var(--danger)]" : ""}`}>{isFrom ? "You" : fromName}</span>{" owes "}
+                <div className="flex-1 min-w-0"><p className="text-sm !text-[#1F2937] dark:!text-slate-100">
+                  <span className={`font-medium ${isFrom ? "text-[var(--danger)]" : ""}`}>{isFrom ? "You" : fromName}</span>{isFrom ? " owe " : " owes "}
                   <span className={`font-medium ${isTo ? "text-[var(--success)]" : ""}`}>{isTo ? "you" : toName}</span></p></div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100 font-money shrink-0">{formatCurrency(t.amount)}</p>
-                {isFrom && <Button size="sm" variant="primary" onClick={() => setSettleTransaction(t)}>Settle</Button>}
+                <p className="font-money font-bold !text-[#1F2937] dark:!text-slate-200 shrink-0">{formatCurrency(t.amount)}</p>
+                {isFrom && <Button size="sm" onClick={() => setSettleTransaction(t)} className="bg-sky-500 !text-white font-bold border-none hover:brightness-110">Pay Now</Button>}
                 {isTo && <Badge variant="accent" size="sm">Waiting for Payment</Badge>}
               </div>
             );
           })}
           {!balancesLoading && hasDebts && (
             <div className="mt-4 p-4 rounded-xl glass-card">
-              <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-3">Net Balances</p>
+              <p className="text-xs font-medium !text-slate-500 dark:!text-slate-400 uppercase tracking-wider mb-3">Net Balances</p>
               <div className="space-y-2">
                 {Object.entries(netBalances ?? {}).map(([uid, bal]) => (
                   <div key={uid} className="flex items-center justify-between">
-                    <span className="text-sm text-[var(--text-secondary)]">{uid === currentUser?.uid ? "You" : memberDetails?.[uid]?.displayName ?? "Unknown"}</span>
+                    <span className="text-sm !text-[#1F2937] dark:!text-slate-300">{uid === currentUser?.uid ? "You" : memberDetails?.[uid]?.displayName ?? "Unknown"}</span>
                     <span className={`text-sm font-medium font-money ${bal > 0 ? "text-[var(--success)]" : bal < 0 ? "text-[var(--danger)]" : "text-[var(--text-muted)]"}`}>{bal > 0 ? "+" : ""}{formatCurrency(bal)}</span>
                   </div>
                 ))}
@@ -192,7 +192,7 @@ function GroupDetail() {
                 <Avatar src={m?.photoURL} name={m?.displayName} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{m?.displayName ?? "Unknown"}{uid === currentUser?.uid && <span className="text-[var(--text-muted)]"> (you)</span>}</p>
+                    <p className="text-sm font-medium text-[#1F2937] dark:text-slate-100 truncate">{m?.displayName ?? "Unknown"}{uid === currentUser?.uid && <span className="text-[var(--text-muted)]"> (you)</span>}</p>
                     {uid === group?.createdBy && <Badge variant="accent" size="sm">Admin</Badge>}
                   </div>
                   <p className="text-xs text-[var(--text-muted)] truncate">{m?.email ?? ""}</p>
@@ -215,13 +215,20 @@ function GroupDetail() {
             <AlertTriangle className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Are you sure?</h3>
+            <h3 className="text-lg font-bold text-[#1F2937] dark:text-slate-100">Are you sure?</h3>
             <p className="text-sm text-[var(--text-secondary)] mt-2">
-              This will permanently delete <span className="font-semibold text-slate-900 dark:text-slate-100">{group?.name}</span>, all its expenses, and settlement data. This action cannot be undone.
+              This will permanently delete <span className="font-semibold text-[#1F2937] dark:text-slate-100">{group?.name}</span>, all its expenses, and settlement data. This action cannot be undone.
             </p>
           </div>
           <div className="flex gap-3 pt-4">
-            <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)} fullWidth>Cancel</Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsDeleteModalOpen(false)} 
+              fullWidth
+              className="px-4 py-2 text-[#1F2937] dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors font-medium"
+            >
+              Cancel
+            </Button>
             <Button onClick={handleDeleteGroup} isLoading={isDeletingGroup} className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-white" fullWidth>
               Yes, Delete Group
             </Button>

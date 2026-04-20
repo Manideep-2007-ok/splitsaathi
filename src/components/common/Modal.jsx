@@ -61,7 +61,7 @@ function Modal({
 
       <div
         className={clsx(
-          "relative w-full rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl animate-slideUp",
+          "relative w-full rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl animate-slideUp text-slate-900 dark:text-slate-100",
           sizeClasses[size] ?? sizeClasses.md,
           className
         )}

@@ -126,7 +126,7 @@ function Friends() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1F2937] dark:text-slate-100 tracking-tight">
           Friends
         </h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">
@@ -137,7 +137,7 @@ function Friends() {
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
           <Mail className="w-4 h-4 text-[var(--accent)]" />
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-semibold text-[#1F2937] dark:text-slate-100">
             Search by name or email
           </h3>
         </div>
@@ -166,7 +166,7 @@ function Friends() {
                 >
                   <Avatar src={user.photoURL} name={user.displayName} size="sm" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                    <p className="text-sm font-medium text-[#1F2937] dark:text-slate-100 truncate">
                       {user.displayName ?? "Unknown"}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] truncate">{user.email}</p>
@@ -199,7 +199,7 @@ function Friends() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-4 h-4 text-[var(--warning)]" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-base font-bold text-[#1F2937] dark:text-slate-100">
               Pending Requests ({pendingReceived.length})
             </h2>
           </div>
@@ -210,7 +210,7 @@ function Friends() {
                 <div key={req.id} className="flex items-center gap-3 p-4 glass-card">
                   <Avatar src={sender.photoURL} name={sender.displayName} size="md" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                    <p className="text-sm font-medium text-[#1F2937] dark:text-slate-100 truncate">
                       {sender.displayName ?? "Someone"}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] truncate">{sender.email ?? ""}</p>
@@ -260,7 +260,7 @@ function Friends() {
                 <div key={friend.friendshipId} className="flex items-center gap-3 p-4 glass-card">
                   <Avatar src={profile.photoURL} name={profile.displayName} size="md" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                    <p className="text-sm font-medium text-[#1F2937] dark:text-slate-100 truncate">
                       {profile.displayName ?? "Unknown"}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] truncate">{profile.email ?? ""}</p>

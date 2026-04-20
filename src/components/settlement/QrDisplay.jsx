@@ -30,7 +30,7 @@ function QrDisplay({ upiId, payeeName, amount }) {
         </p>
         <p className="text-[10px] text-[var(--text-muted)]">UPI ID: {upiId}</p>
       </div>
-      <p className="text-xs text-[var(--text-muted)]">Scan this QR code with any UPI app, then click &quot;Mark as Paid&quot; below</p>
+      <p className="text-xs text-[var(--text-muted)]">Scan this QR code with any UPI app, then click &quot;I have completed the payment&quot; below</p>
     </div>
   );
 }

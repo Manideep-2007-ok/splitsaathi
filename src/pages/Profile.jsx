@@ -45,7 +45,7 @@ function Profile() {
   return (
     <div className="max-w-xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold !text-[#1F2937] dark:!text-white tracking-tight">
           Profile
         </h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">
@@ -61,19 +61,19 @@ function Profile() {
         </div>
         <div className="pt-14 px-6 pb-6">
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg font-bold !text-[#1F2937] dark:!text-white">
               {userProfile?.displayName ?? "User"}
             </h2>
             {userProfile?.upiId && <Badge variant="success" size="sm" dot>UPI</Badge>}
           </div>
-          <p className="text-sm text-slate-700 dark:text-slate-300">
+          <p className="text-sm !text-[#1F2937] dark:!text-slate-200">
             {userProfile?.email ?? ""}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSave} className="rounded-2xl p-6 space-y-5 glass-card">
-        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
+        <h3 className="text-base font-bold !text-[#1F2937] dark:!text-white mb-4">
           Edit Profile
         </h3>
         <Input label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} leftIcon={<User className="w-4 h-4" />} placeholder="Your name" error={displayName.length > 0 && displayName.trim().length === 0 ? "Name cannot be empty" : undefined} />
@@ -86,27 +86,27 @@ function Profile() {
       </form>
 
       <div className="rounded-2xl p-6 glass-card">
-        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
+        <h3 className="text-base font-bold !text-[#1F2937] dark:!text-white mb-4">
           Account Info
         </h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)]">
-            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
-              <Shield className="w-4 h-4 text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2 text-sm !text-slate-500 dark:!text-slate-400">
+              <Shield className="w-4 h-4" />
               <span>Auth Provider</span>
             </div>
             <Badge variant="accent" size="sm">Google</Badge>
           </div>
           <div className="flex items-center justify-between py-2 border-b border-[var(--border-subtle)]">
-            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
-              <Calendar className="w-4 h-4 text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2 text-sm !text-slate-500 dark:!text-slate-400">
+              <Calendar className="w-4 h-4" />
               <span>Member Since</span>
             </div>
-            <span className="text-sm text-slate-700 dark:text-slate-300">{formatDate(userProfile?.createdAt)}</span>
+            <span className="text-sm !text-[#1F2937] dark:!text-slate-200">{formatDate(userProfile?.createdAt)}</span>
           </div>
           <div className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-slate-100">
-              <Smartphone className="w-4 h-4 text-[var(--text-muted)]" />
+            <div className="flex items-center gap-2 text-sm !text-slate-500 dark:!text-slate-400">
+              <Smartphone className="w-4 h-4" />
               <span>UPI Status</span>
             </div>
             <Badge variant={userProfile?.upiId ? "success" : "warning"} size="sm" dot>

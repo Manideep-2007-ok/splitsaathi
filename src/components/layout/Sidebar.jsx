@@ -56,13 +56,12 @@ function Sidebar({ isOpen, onClose }) {
         )}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border-subtle)]">
-          <Link 
-            to="/dashboard" 
-            onClick={() => window.location.reload()} 
-            className="text-2xl font-logo text-[var(--accent)] hover:brightness-110 transition-all"
+          <div 
+            onClick={() => { navigate('/dashboard'); window.location.reload(); }} 
+            className="text-2xl font-logo text-[var(--accent)] hover:brightness-110 transition-all cursor-pointer"
           >
             SplitSaathi
-          </Link>
+          </div>
 
           <div className="flex items-center gap-1">
             <button
@@ -97,7 +96,7 @@ function Sidebar({ isOpen, onClose }) {
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
                   isActive
                     ? "bg-[var(--accent-glow)] text-[var(--accent)]"
-                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-[var(--bg-elevated)]"
+                    : "text-slate-600 dark:text-slate-300 hover:text-[#1F2937] dark:hover:text-slate-100 hover:bg-[var(--bg-elevated)]"
                 )
               }
             >
@@ -129,7 +128,7 @@ function Sidebar({ isOpen, onClose }) {
               size="sm"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+              <p className="text-sm font-medium text-[#1F2937] dark:text-slate-100 truncate">
                 {userProfile?.displayName ?? "User"}
               </p>
               <p className="text-xs text-[var(--text-muted)] truncate">

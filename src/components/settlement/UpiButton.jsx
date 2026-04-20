@@ -24,8 +24,8 @@ function UpiButton({ upiId, payeeName, amount, onSettle, isLoading }) {
         <span className="font-money font-semibold text-[var(--text-primary)]">{formatCurrency(amount)}</span>{" "}
         to {payeeName}
       </p>
-      <Button onClick={handlePayViaUpi} isLoading={isLoading} fullWidth size="lg" className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)]">
-        Pay {formatCurrency(amount)} via UPI
+      <Button onClick={handlePayViaUpi} isLoading={isLoading} fullWidth size="lg" className="bg-[#5AA9E6] text-[#F9F9F9] font-bold border-none hover:brightness-110">
+        Pay Now
       </Button>
       <p className="text-[10px] text-[var(--text-muted)]">UPI ID: {upiId}</p>
     </div>

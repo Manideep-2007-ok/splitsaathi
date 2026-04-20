@@ -20,7 +20,7 @@ const Input = forwardRef(function Input(
   const inputId = id ?? `input-${label?.toLowerCase().replace(/\s+/g, "-") ?? "field"}`;
 
   const sharedClasses = clsx(
-    "w-full rounded-xl bg-[var(--bg-elevated)] border text-slate-900 dark:text-slate-100 placeholder:text-[var(--text-muted)] transition-all duration-200",
+    "w-full rounded-xl bg-[var(--bg-elevated)] border !text-[#1F2937] dark:!text-slate-100 placeholder:text-[var(--text-muted)] transition-all duration-200",
     "focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]",
     error
       ? "border-[var(--danger)] focus:ring-[var(--danger)]"
@@ -36,7 +36,7 @@ const Input = forwardRef(function Input(
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-1.5"
+          className="block text-sm font-medium !text-slate-500 dark:!text-slate-400 mb-1.5"
         >
           {label}
         </label>
