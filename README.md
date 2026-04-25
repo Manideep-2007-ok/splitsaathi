@@ -1,48 +1,52 @@
 # SplitSaathi 🤝 
 ### *Smart Expense Splitting & Debt Simplification*
 
+**Live Demo:** [splitsaathi-six.vercel.app](https://splitsaathi-six.vercel.app)
+
 **SplitSaathi** is a specialized expense management platform built to handle complex group finances. It simplifies peer-to-peer debts using a custom greedy algorithm, ensuring that even in large groups, the number of transactions required to settle up is minimized.
 
 ---
 
-## 🚀 Core Functionalities
+## 🚀 Key Features
 
-### 1. Group & Expense Management
 * **Real-time Synchronization:** Leverages Firebase Firestore Snapshots to update group balances and activity feeds instantly across all members.
-* **Flexible Splitting:** Supports equal splits, percentage-based distributions, and exact amount assignments.
-* **Category Tracking:** Automatic categorization of expenses (Food, Travel, Rent, etc.) for monthly spending analytics.
-
-### 2. The "Waterfall" Debt Algorithm (DSA)
-The heart of SplitSaathi is a greedy algorithm designed to solve the "Maximum Flow" problem in debt simplification:
-* **Net Calculation:** Aggregates all group transactions into a single `netBalance` for each user.
-* **Transaction Minimization:** Identifies the largest debtor and matches them with the largest creditor to eliminate balances in the fewest steps possible.
-* **Non-Falsifiable Settlements:** Built-in "Human Webhook" system where payers provide a UTR/Transaction ID and receivers must verify the receipt before the group balance updates.
-
-### 3. Unified Notification System
-* **Social Hub:** A single notification center for Group Invitations, Friend Requests, and Payment Verification requests.
-* **Real-time Alerts:** Integrated `react-toastify` notifications for background activity.
+* **Waterfall Debt Algorithm:** A custom-built greedy algorithm that calculates net balances and minimizes peer-to-peer transactions.
+* **Unified Notification Center:** A central hub for managing Group Invitations, Friend Requests, and Payment Verifications.
+* **Smart Dashboards:** At-a-glance overview of total "Owed to You" and "You Owe" amounts across all groups.
+* **Responsive Design:** A fully mobile-responsive UI built with Tailwind CSS and Lucide React.
 
 ---
 
-## 🛠️ Project Structure
+## 🛠️ Technical Stack
+
+* **Frontend:** [React.js](https://reactjs.org/) (Vite)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Database & Auth:** [Firebase](https://firebase.google.com/) (Firestore, Authentication)
+* **Deployment:** [Vercel](https://vercel.com/)
+* **Icons:** [Lucide React](https://lucide.dev/)
+* **State Management:** React Context API & Custom Hooks
+
+---
+
+## 🏗️ Project Structure
 
 ```text
 src/
 ├── components/
-│   ├── common/         # Button, Modal, Avatar, Badge, Skeleton
-│   ├── expenses/       # ExpenseCard, ExpenseForm
-│   ├── settlement/     # SettleModal, UpiButton, QrDisplay
-│   └── notifications/  # NotificationBell, NotificationItem
+│   ├── common/         # Reusable UI: Button, Modal, Avatar, Badge, Skeleton
+│   ├── expenses/       # Expense management: ExpenseCard, ExpenseForm
+│   ├── groups/         # Group-specific views and logic
+│   └── notifications/  # NotificationBell and Item components
 ├── context/
-│   ├── AuthContext.jsx         # Firebase Auth State
-│   └── NotificationContext.jsx # Live Notification Listeners
+│   ├── AuthContext.jsx         # Global Firebase Authentication state
+│   └── NotificationContext.jsx # Real-time notification listeners
 ├── hooks/
-│   ├── useBalances.js  # Core DSA logic for debt simplification
-│   ├── useExpenses.js  # Real-time expense fetching
-│   └── useToast.js     # Global alert management
+│   ├── useBalances.js  # The "Waterfall" logic for debt simplification
+│   ├── useExpenses.js  # Custom hook for real-time expense data
+│   └── useToast.js     # Global notification/toast management
 ├── services/
-│   ├── groups.js       # CRUD operations for Firestore Groups
-│   ├── settlements.js  # Logic for recording payments
-│   └── users.js        # Profile and friend management
+│   ├── groups.js       # Firestore CRUD for groups
+│   ├── expenses.js     # Firestore CRUD for expenses
+│   └── users.js        # User profile and friendship services
 └── utils/
-    └── formatters.js   # Currency and Date formatting
+    └── formatters.js   # Currency (INR) and Date formatting
